@@ -1,18 +1,18 @@
 use cspuz_rs::graph;
 use cspuz_rs::serializer::{
-    problem_to_url_with_context, url_to_problem, Combinator, Context, Rooms,
-}
+    problem_to_url_with_context, url_to_problem, Combinator, Context, DecInt, Dict, Rooms, Sequencer, Size, Tuple2,
+};
 use cspuz_rs::solver::Solver;
 
 
 pub fn solve_star_battle(
-    star_amount: i32;
+    star_amount: i32,
     borders: &graph::InnerGridEdges<Vec<Vec<bool>>>,
 
 ) -> Option<Vec<Vec<Option<bool>>>> {
     let height = borders.vertical.len();
 
-    if (width != borders.vertical[0].len() + 1){ // Non-square grid, throw no solutions
+    if height != borders.vertical[0].len() + 1{ // Non-square grid, throw no solutions
         return None;
     }
 
@@ -42,18 +42,18 @@ pub fn solve_star_battle(
 struct StarAmountCombinator;
 
 impl Combinator<i32> for StarAmountCombinator {
-    fn serialize(&self, ctx: &Context, input: &[i32]) -> Option<(usize, Vec<u8>)> {
+    fn serialize(&self, _ctx: &Context, input: &[i32]) -> Option<(usize, Vec<u8>)> {
         if input.len() == 0 {
             return None;
         }
 
         let mut ret = vec![];
         ret.push('/' as u8);
-        for x in 0..input.len() {
-            ret.push(input[i] as u8)?;
+        for i in 0..input.len() {
+            ret.push(input[i] as u8);
         }
 
-        Some((1, Ret))
+        Some((1, ret))
     }
 
     fn deserialize(&self, ctx: &Context, input: &[u8],) -> Option<(usize, Vec<i32>)> {
@@ -61,15 +61,14 @@ impl Combinator<i32> for StarAmountCombinator {
         sequencer.deserialize(ctx, Dict::new(0, "/"))?;
         let star_amount = sequencer.deserialize(ctx, DecInt)?;
         assert_eq!(star_amount.len(), 1);
-        let ret = star_amount as i32;
 
-        Some((sequencer.n_read(), vec![ret]))
+        Some((sequencer.n_read(), star_amount))
     }
 }
 
 pub type Problem = (i32, graph::InnerGridEdges<Vec<Vec<bool>>>);
 
-fn combinator() -> Combinator<Problem> {
+fn combinator() -> impl Combinator<Problem> {
     Size::new(Tuple2::new(
         StarAmountCombinator,
         Rooms,
@@ -81,7 +80,7 @@ pub fn serialize_problem(problem: &Problem) -> Option<String> {
         combinator(),
         "starbattle",
         problem.clone(),
-        &Context::sized(problem.0.len(), problem.0[0].len()),
+        &Context::sized(problem.1.vertical.len(), problem.1.vertical[0].len() + 1),
     )
 }
 
@@ -97,21 +96,21 @@ mod tests {
     fn problem_for_tests() -> Problem {
         let star_amount = 1 as i32;
         let borders = graph::InnerGridEdges {
-            horizontal: vec![
-                vec![0, 1, 1, 0, 0, 0],
-                vec![1, 0, 0, 1, 1, 0],
-                vec![0, 1, 1, 1, 1, 0],
-                vec![0, 1, 1, 0, 1, 1],
-                vec![0, 1, 0, 1, 0, 0],
-            ],
-            vertical: vec![
-                vec![0, 0, 0, 1, 0],
-                vec![1, 1, 1, 1, 0],
-                vec![0, 1, 0, 0, 1],
-                vec![1, 0, 0, 0, 0],
-                vec![1, 0, 1, 1, 1],
-                vec![0, 1, 0, 0, 1],
-            ],
+            horizontal: crate::util::tests::to_bool_2d([
+                [0, 1, 1, 0, 0, 0],
+                [1, 0, 0, 1, 1, 0],
+                [0, 1, 1, 1, 1, 0],
+                [0, 1, 1, 0, 1, 1],
+                [0, 1, 0, 1, 0, 0],
+            ]),
+            vertical: crate::util::tests::to_bool_2d([
+                [0, 0, 0, 1, 0],
+                [1, 1, 1, 1, 0],
+                [0, 1, 0, 0, 1],
+                [1, 0, 0, 0, 0],
+                [1, 0, 1, 1, 1],
+                [0, 1, 0, 0, 1],
+            ]),
         };
         (star_amount, borders)
     }
@@ -119,7 +118,7 @@ mod tests {
     #[test]
     fn test_star_battle_problem() {
         let (star_amount, borders) = problem_for_tests();
-        let ans = solve_star_battle(&star_amount, &borders);
+        let ans = solve_star_battle(star_amount, &borders);
         assert!(ans.is_some());
         let ans = ans.unwrap();
 
