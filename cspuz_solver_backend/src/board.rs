@@ -120,7 +120,7 @@ impl ItemKind {
             &ItemKind::DottedSlash => String::from("\"dottedSlash\""),
             &ItemKind::DottedBackslash => String::from("\"dottedBackslash\""),
             &ItemKind::Plus => String::from("\"plus\""),
-            &ItemKind::Star => String::from("\"Star\""),
+            &ItemKind::Star => String::from("\"star\""),
             &ItemKind::DottedHorizontalWall => String::from("\"dottedHorizontalWall\""),
             &ItemKind::DottedVerticalWall => String::from("\"dottedVerticalWall\""),
             &ItemKind::FirewalkCellUnknown => String::from("\"firewalkCellUnknown\""),
