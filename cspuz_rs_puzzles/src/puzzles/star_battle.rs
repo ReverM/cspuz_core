@@ -51,7 +51,7 @@ impl Combinator<i32> for StarAmountCombinator {
 
         let mut ret = vec![];
         for i in 0..input.len() {
-            ret.push(input[i].try_into().unwrap());
+            ret.push((input[i] as usize) as u8);
         }
         ret.push('/' as u8);
         Some((1, ret))
