@@ -51,15 +51,15 @@ impl Combinator<i32> for StarAmountCombinator {
 
         let mut ret = vec![];
         let mut v = input[0];
-            if v == 0 {
-                ret.push('0' as u8);
-            } else {
-                while v > 0 {
-                    ret.push((v % 10) as u8 + '0' as u8);
-                    v /= 10;
-                }
-                ret.reverse();
+        if v == 0 {
+            ret.push('0' as u8);
+        } else {
+            while v > 0 {
+                ret.push((v % 10) as u8 + '0' as u8);
+                v /= 10;
             }
+            ret.reverse();
+        }
         ret.push('/' as u8);
         Some((1, ret))
     }
