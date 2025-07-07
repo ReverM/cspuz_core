@@ -229,7 +229,7 @@ mod tests {
             vec![
                 vec![None, None, None, None],
                 vec![None, None, None, None],
-                vec![Some(4), None, None, None],
+                vec![Some(3), None, None, None],
                 vec![None, None, None, None],
             ],
             None,
@@ -249,10 +249,10 @@ mod tests {
                 [1, 1, 0, 0],
             ]),
             vertical: crate::util::tests::to_option_bool_2d([
-                [1, 0, 0],
-                [1, 1, 0],
+                [0, 0, 1],
                 [1, 0, 1],
-                [1, 0, 0],
+                [0, 1, 1],
+                [0, 0, 1],
             ]),
         };
         assert_eq!(ans, expected);
