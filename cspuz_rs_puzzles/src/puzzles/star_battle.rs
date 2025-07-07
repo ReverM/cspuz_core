@@ -49,22 +49,21 @@ impl Combinator<i32> for StarAmountCombinator {
             return None;
         }
 
-        let mut ret = vec![];
-
+        let mut ret = vec![];  
         for i in 0..input.len() {
             ret.push(input[i] as u8);
         }
         ret.push('/' as u8);
-        
         Some((1, ret))
     }
 
     fn deserialize(&self, ctx: &Context, input: &[u8]) -> Option<(usize, Vec<i32>)> {
         let mut sequencer = Sequencer::new(input);
-
+        
         let star_amount = sequencer.deserialize(ctx, DecInt)?;
         assert_eq!(star_amount.len(), 1);
         sequencer.deserialize(ctx, Dict::new(0, "/"))?;
+
         Some((sequencer.n_read(), star_amount))
     }
 }
