@@ -1,18 +1,18 @@
 use cspuz_rs::graph;
 use cspuz_rs::serializer::{
-    problem_to_url_with_context, url_to_problem, Combinator, Context, DecInt, Dict, Rooms, Sequencer, Size, Tuple2,
+    problem_to_url_with_context, url_to_problem, Combinator, Context, DecInt, Dict, Rooms,
+    Sequencer, Size, Tuple2,
 };
 use cspuz_rs::solver::Solver;
-
 
 pub fn solve_star_battle(
     star_amount: i32,
     borders: &graph::InnerGridEdges<Vec<Vec<bool>>>,
-
 ) -> Option<Vec<Vec<Option<bool>>>> {
     let height = borders.vertical.len();
 
-    if height != borders.vertical[0].len() + 1{ // Non-square grid, throw no solutions
+    if height != borders.vertical[0].len() + 1 {
+        // Non-square grid, throw no solutions
         return None;
     }
 
@@ -29,8 +29,10 @@ pub fn solve_star_battle(
     }
     solver.add_expr(!(has_star.slice((..(height - 1), ..)) & has_star.slice((1.., ..))));
     solver.add_expr(!(has_star.slice((.., ..(height - 1))) & has_star.slice((.., 1..))));
-    solver.add_expr(!(has_star.slice((..(height - 1), ..(height - 1))) & has_star.slice((1.., 1..))));
-    solver.add_expr(!(has_star.slice((..(height - 1), 1..)) & has_star.slice((1.., ..(height - 1)))));
+    solver
+        .add_expr(!(has_star.slice((..(height - 1), ..(height - 1))) & has_star.slice((1.., 1..))));
+    solver
+        .add_expr(!(has_star.slice((..(height - 1), 1..)) & has_star.slice((1.., ..(height - 1)))));
 
     for room in &rooms {
         solver.add_expr(has_star.select(room).count_true().eq(star_amount));
@@ -48,20 +50,21 @@ impl Combinator<i32> for StarAmountCombinator {
         }
 
         let mut ret = vec![];
-        ret.push('/' as u8);
+
         for i in 0..input.len() {
             ret.push(input[i] as u8);
         }
-
+        ret.push('/' as u8);
+        
         Some((1, ret))
     }
 
-    fn deserialize(&self, ctx: &Context, input: &[u8],) -> Option<(usize, Vec<i32>)> {
+    fn deserialize(&self, ctx: &Context, input: &[u8]) -> Option<(usize, Vec<i32>)> {
         let mut sequencer = Sequencer::new(input);
-        sequencer.deserialize(ctx, Dict::new(0, "/"))?;
+
         let star_amount = sequencer.deserialize(ctx, DecInt)?;
         assert_eq!(star_amount.len(), 1);
-
+        sequencer.deserialize(ctx, Dict::new(0, "/"))?;
         Some((sequencer.n_read(), star_amount))
     }
 }
@@ -69,10 +72,7 @@ impl Combinator<i32> for StarAmountCombinator {
 pub type Problem = (i32, graph::InnerGridEdges<Vec<Vec<bool>>>);
 
 fn combinator() -> impl Combinator<Problem> {
-    Size::new(Tuple2::new(
-        StarAmountCombinator,
-        Rooms,
-    ))
+    Size::new(Tuple2::new(StarAmountCombinator, Rooms))
 }
 
 pub fn serialize_problem(problem: &Problem) -> Option<String> {

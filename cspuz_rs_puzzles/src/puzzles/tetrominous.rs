@@ -6,7 +6,6 @@ use cspuz_rs::serializer::{
 };
 use cspuz_rs::solver::{all, any, Solver};
 
-
 fn tetrominoes() -> [(char, Vec<(usize, usize)>); 5] {
     [
         ('I', vec![(0, 0), (0, 1), (0, 2), (0, 3)]),
@@ -67,7 +66,6 @@ fn adjacent_edges(piece: &[(usize, usize)]) -> (Vec<(usize, usize)>, Vec<(usize,
 
     (horizontal, vertical)
 }
-
 
 pub fn solve_tetrominous(
     clues: &[Vec<Option<i32>>],
@@ -220,7 +218,6 @@ pub fn serialize_tetrominous_problem(problem: &Problem) -> Option<String> {
 pub fn deserialize_tetrominous_problem(url: &str) -> Option<Problem> {
     url_to_problem(combinator(), &["tetrominous"], url)
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -23,7 +23,6 @@ fn pentominoes() -> [(char, Vec<(usize, usize)>); 12] {
     ]
 }
 
-
 fn bbox(piece: &[(usize, usize)]) -> (usize, usize) {
     let mut h = 0;
     let mut w = 0;
@@ -195,7 +194,6 @@ pub fn solve_pentominous(
     solver.irrefutable_facts().map(|f| f.get(&is_border))
 }
 
-
 type Problem = (
     Vec<Vec<Option<i32>>>,
     Option<graph::InnerGridEdges<Vec<Vec<bool>>>>,
@@ -228,7 +226,6 @@ pub fn serialize_pentominous_problem(problem: &Problem) -> Option<String> {
 pub fn deserialize_pentominous_problem(url: &str) -> Option<Problem> {
     url_to_problem(combinator(), &["pentominous"], url)
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -283,5 +280,4 @@ mod tests {
             deserialize_pentominous_problem,
         );
     }
-
 }
