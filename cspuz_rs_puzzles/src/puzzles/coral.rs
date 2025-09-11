@@ -1,7 +1,7 @@
 use cspuz_rs::graph;
 use cspuz_rs::serializer::{
-    problem_to_url_with_context_and_site, url_to_problem, Choice, Combinator, Context, HexInt,
-    Optionalize, Seq, Size, Spaces,
+    problem_to_url_with_context_and_site, url_to_problem, Combinator, Context, HexInt,
+    OutsideSequences, Size,
 };
 use cspuz_rs::solver::{any, count_true, BoolVarArray1D, Solver, TRUE};
 
@@ -24,23 +24,19 @@ pub fn solve_coral(
             & is_black.slice((1.., 1..))),
     );
 
-    let mut aux_graph = graph::Graph::new(h * w + 1);
-    let mut aux_vertices = vec![];
+    let mut aux_graph = graph::infer_graph_from_2d_array((h, w));
+    let mut aux_vertices = (!is_black).into_iter().collect::<Vec<_>>();
+
+    let outer = aux_graph.add_vertex();
+    aux_vertices.push(TRUE);
+
     for y in 0..h {
         for x in 0..w {
-            aux_vertices.push(!is_black.at((y, x)));
-            if y < h - 1 {
-                aux_graph.add_edge(y * w + x, (y + 1) * w + x);
-            }
-            if x < w - 1 {
-                aux_graph.add_edge(y * w + x, y * w + (x + 1));
-            }
             if y == 0 || y == h - 1 || x == 0 || x == w - 1 {
-                aux_graph.add_edge(y * w + x, h * w);
+                aux_graph.add_edge(y * w + x, outer);
             }
         }
     }
-    aux_vertices.push(TRUE);
     graph::active_vertices_connected(&mut solver, &aux_vertices, &aux_graph);
 
     for y in 0..(h - 1) {
@@ -77,102 +73,9 @@ pub fn solve_coral(
 }
 
 type Problem = (Vec<Option<Vec<i32>>>, Vec<Option<Vec<i32>>>);
-struct CoralCombinator;
-
-impl Combinator<Problem> for CoralCombinator {
-    fn serialize(&self, ctx: &Context, input: &[Problem]) -> Option<(usize, Vec<u8>)> {
-        if input.len() == 0 {
-            return None;
-        }
-
-        let (clue_vertical, clue_horizontal) = &input[0];
-        let h = ctx.height?;
-        let w = ctx.width?;
-        let mut seq = vec![];
-        for i in 0..w {
-            let n_filled = if let Some(clue) = &clue_vertical[i] {
-                for c in clue {
-                    seq.push(Some(*c));
-                }
-                clue.len()
-            } else {
-                0
-            };
-            let n_pad = (h + 1) / 2 - n_filled;
-            for _ in 0..n_pad {
-                seq.push(None);
-            }
-        }
-        for i in 0..h {
-            let n_filled = if let Some(clue) = &clue_horizontal[i] {
-                for c in clue {
-                    seq.push(Some(*c));
-                }
-                clue.len()
-            } else {
-                0
-            };
-            let n_pad = (w + 1) / 2 - n_filled;
-            for _ in 0..n_pad {
-                seq.push(None);
-            }
-        }
-        let sub = Seq::new(
-            Choice::new(vec![
-                Box::new(Optionalize::new(HexInt)),
-                Box::new(Spaces::new(None, 'g')),
-            ]),
-            seq.len(),
-        );
-        sub.serialize(ctx, &[seq])
-    }
-
-    fn deserialize(&self, ctx: &Context, input: &[u8]) -> Option<(usize, Vec<Problem>)> {
-        let h = ctx.height?;
-        let w = ctx.width?;
-        let base_seq_len = ((h + 1) / 2) * w + ((w + 1) / 2) * h;
-        let sub = Seq::new(
-            Choice::new(vec![
-                Box::new(Optionalize::new(HexInt)),
-                Box::new(Spaces::new(None, 'g')),
-            ]),
-            base_seq_len,
-        );
-        let (n_read, seq) = sub.deserialize(ctx, input)?;
-        assert_eq!(seq.len(), 1);
-        let seq = &seq[0];
-        let mut pos = 0;
-
-        let mut clue_vertical = vec![];
-        for _ in 0..w {
-            let cs = &seq[pos..(pos + (h + 1) / 2)];
-            let cs = cs.iter().filter_map(|&x| x).collect::<Vec<_>>();
-            if cs.is_empty() {
-                clue_vertical.push(None);
-            } else {
-                clue_vertical.push(Some(cs));
-            }
-            pos += (h + 1) / 2;
-        }
-
-        let mut clue_horizontal = vec![];
-        for _ in 0..h {
-            let cs = &seq[pos..(pos + (w + 1) / 2)];
-            let cs = cs.iter().filter_map(|&x| x).collect::<Vec<_>>();
-            if cs.is_empty() {
-                clue_horizontal.push(None);
-            } else {
-                clue_horizontal.push(Some(cs));
-            }
-            pos += (w + 1) / 2;
-        }
-
-        Some((n_read, vec![(clue_vertical, clue_horizontal)]))
-    }
-}
 
 fn combinator() -> impl Combinator<Problem> {
-    Size::new(CoralCombinator)
+    Size::new(OutsideSequences::new(HexInt))
 }
 
 pub fn serialize_problem(problem: &Problem) -> Option<String> {
@@ -248,7 +151,7 @@ mod tests {
     fn problem_for_tests() -> (Vec<Option<Vec<i32>>>, Vec<Option<Vec<i32>>>) {
         let clue_vertical = vec![
             Some(vec![1]),
-            Some(vec![3, 1, 1]),
+            Some(vec![1, 1, 3]),
             Some(vec![3, 3]),
             None,
             None,
@@ -256,9 +159,9 @@ mod tests {
         ];
         let clue_horizontal = vec![
             None,
-            Some(vec![2, 1]),
-            Some(vec![2, 1]),
-            Some(vec![2, 1]),
+            Some(vec![1, 2]),
+            Some(vec![1, 2]),
+            Some(vec![1, 2]),
             Some(vec![3]),
             None,
             Some(vec![2]),
