@@ -101,6 +101,7 @@ pub mod sudoku;
 pub mod sukoro;
 pub mod tapa;
 pub mod tasquare;
+pub mod tents;
 pub mod the_longest;
 pub mod timebomb;
 pub mod tontonbeya;
