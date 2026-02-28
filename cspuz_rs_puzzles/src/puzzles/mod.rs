@@ -76,6 +76,7 @@ pub mod milktea;
 pub mod minesweeper;
 pub mod moonsun;
 pub mod morningwalk;
+pub mod move_common;
 pub mod multiplication_link;
 pub mod n_cells;
 pub mod nagenawa;
