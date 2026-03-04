@@ -52,6 +52,7 @@ pub mod heyawake;
 pub mod hidato;
 pub mod hitori;
 pub mod icewalk;
+pub mod inabas;
 pub mod inverse_litso;
 pub mod japanese_sums;
 pub mod kakuro;
