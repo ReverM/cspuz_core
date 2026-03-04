@@ -55,15 +55,17 @@ pub fn solve(url: &str) -> Result<Board, &'static str> {
             if let Some(ref clues) = cells {
                 if let Some(n) = clues[y][x] {
                     if n >= 0 {
-                        board.push(Item::cell(y, x, "black", ItemKind::Num(n)));
+                        board.push(Item::cell(y + 1, x + 1, "black", ItemKind::Num(n)));
                     } else {
-                        board.push(Item::cell(y, x, "black", ItemKind::Text("?")));
+                        board.push(Item::cell(y + 1, x + 1, "black", ItemKind::Text("?")));
                     }
                 }
             } else if let Some(ans) = &ans {
                 if let Some(n) = ans[y][x] {
                     if n > 0 {
-                        board.push(Item::cell(y, x, "green", ItemKind::Num(n)));
+                        board.push(Item::cell(y + 1, x + 1, "green", ItemKind::Num(n)));
+                    } else {
+                        board.push(Item::cell(y + 1, x + 1, "green", ItemKind::Dot));
                     }
                 }
             }
