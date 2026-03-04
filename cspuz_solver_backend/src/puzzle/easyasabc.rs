@@ -5,13 +5,13 @@ use cspuz_rs_puzzles::puzzles::easyasabc;
 pub fn solve(url: &str) -> Result<Board, &'static str> {
     let (range, (clues_up, clues_down, clues_left, clues_right, cells)) =
         easyasabc::deserialize_problem(url).ok_or("invalid url")?;
-    let ans: Option<Vec<Vec<Option<i32>>>> = easyasabc::solve_easyasabc(
+    let ans: Option<Vec<Vec<Option<i32>>>> = easyasabc::solve_easy_as_abc(
         range,
         &clues_up,
         &clues_down,
         &clues_left,
         &clues_right,
-        cells,
+        &cells,
     );
 
     let height = clues_left.len();
@@ -52,32 +52,18 @@ pub fn solve(url: &str) -> Result<Board, &'static str> {
 
     for y in 0..height {
         for x in 0..width {
-            if let Some(clue) = problem[y][x] {
-                if (1..=26).contains(&clue) {
-                    let p = (clue - 1) as usize;
-                    board.push(Item::cell(
-                        y + 1,
-                        x + 1,
-                        "black",
-                        ItemKind::Text(&ALPHA[p..=p]),
-                    ));
-                } else {
-                    board.push(Item::cell(y + 1, x + 1, "black", ItemKind::Num(clue - 26)));
+            if let Some(ref clues) = cells {
+                if let Some(n) = clues[y][x] {
+                    if n >= 0 {
+                        board.push(Item::cell(y, x, "black", ItemKind::Num(n)));
+                    } else {
+                        board.push(Item::cell(y, x, "black", ItemKind::Text("?")));
+                    }
                 }
             } else if let Some(ans) = &ans {
-                if let Some(a) = ans[y][x] {
-                    if a == -1 {
-                        board.push(Item::cell(y + 1, x + 1, "green", ItemKind::Dot));
-                    } else if (1..=26).contains(&a) {
-                        let p = (a - 1) as usize;
-                        board.push(Item::cell(
-                            y + 1,
-                            x + 1,
-                            "green",
-                            ItemKind::Text(&ALPHA[p..=p]),
-                        ));
-                    } else {
-                        board.push(Item::cell(y + 1, x + 1, "green", ItemKind::Num(clue - 26)));
+                if let Some(n) = ans[y][x] {
+                    if n > 0 {
+                        board.push(Item::cell(y, x, "green", ItemKind::Num(n)));
                     }
                 }
             }
