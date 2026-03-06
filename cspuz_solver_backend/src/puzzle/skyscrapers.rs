@@ -1,18 +1,12 @@
 use crate::board::{Board, BoardKind, Item, ItemKind};
 use crate::uniqueness::Uniqueness;
-use cspuz_rs_puzzles::puzzles::easyasabc;
+use cspuz_rs_puzzles::puzzles::skyscrapers;
 
 pub fn solve(url: &str) -> Result<Board, &'static str> {
-    let (range, (clues_up, clues_down, clues_left, clues_right, cells)) =
-        easyasabc::deserialize_problem(url).ok_or("invalid url")?;
-    let ans: Option<Vec<Vec<Option<i32>>>> = easyasabc::solve_easy_as_abc(
-        range,
-        &clues_up,
-        &clues_down,
-        &clues_left,
-        &clues_right,
-        &cells,
-    );
+    let (clues_up, clues_down, clues_left, clues_right, cells) =
+        skyscrapers::deserialize_problem(url).ok_or("invalid url")?;
+    let ans: Option<Vec<Vec<Option<i32>>>> =
+        skyscrapers::solve_skyscrapers(&clues_up, &clues_down, &clues_left, &clues_right, &cells);
 
     let height = clues_left.len();
     let width = clues_up.len();
