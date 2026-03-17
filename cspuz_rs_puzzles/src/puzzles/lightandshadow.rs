@@ -23,6 +23,10 @@ pub fn solve_lightandshadow(clues: &[Vec<Option<(i32, bool)>>]) -> Option<Vec<Ve
         }
     }
 
+    if clue_pos.len() == 0 {
+        return None;
+    }
+
     let group_id = solver.int_var_2d((h, w), 1, clue_pos.len() as i32);
 
     for i in 1..=clue_pos.len() {
