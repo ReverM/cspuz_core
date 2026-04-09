@@ -11,6 +11,16 @@ pub fn solve(url: &str) -> Result<Board, &'static str> {
     let mut board = Board::new(BoardKind::Grid, height, width, check_uniqueness(&ans));
     board.add_borders(&borders, "black");
 
+    if let Some(is_hole) = holes {
+        for y in 0..height {
+            for x in 0..width {
+                if is_hole[y][x] {
+                    board.push(Item::cell(y, x, "black", ItemKind::Fill));
+                }
+            }
+        }
+    }
+
     if let Some(is_line) = &ans {
         board.add_lines_irrefutable_facts(is_line, "green", None);
     }
