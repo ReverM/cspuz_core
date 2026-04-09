@@ -60,6 +60,7 @@ pub mod hitori;
 pub mod icewalk;
 pub mod inabas;
 pub mod inverse_litso;
+pub mod isowatari;
 pub mod japanese_sums;
 pub mod kakuro;
 pub mod keywest;
