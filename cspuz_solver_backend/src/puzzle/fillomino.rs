@@ -1,10 +1,12 @@
 use crate::board::{Board, BoardKind, Item, ItemKind};
 use crate::uniqueness::check_uniqueness;
+use cspuz_rs::graph;
 use cspuz_rs_puzzles::puzzles::fillomino;
 
 pub fn solve(url: &str) -> Result<Board, &'static str> {
-    let (max3, problem) = fillomino::deserialize_problem(url).ok_or("invalid url")?;
-    let ans = fillomino::solve_fillomino(max3, &problem);
+    let (max3, problem, default_borders) =
+        fillomino::deserialize_problem(url).ok_or("invalid url")?;
+    let ans = fillomino::solve_fillomino(max3, &problem, &default_borders);
 
     let height = problem.len();
     let width = problem[0].len();
@@ -31,8 +33,32 @@ pub fn solve(url: &str) -> Result<Board, &'static str> {
         }
     }
 
-    board.add_borders_as_answer(ans.as_ref().map(|(_, border)| border));
-
+    if let Some(default_borders) = default_borders {
+        board.add_borders(&default_borders, "black");
+        if let Some((_, borders)) = &ans {
+            let mut borders_minus_given = graph::InnerGridEdges {
+                horizontal: borders.horizontal.clone(),
+                vertical: borders.vertical.clone(),
+            };
+            for y in 0..height {
+                for x in 0..(width - 1) {
+                    if default_borders.vertical[y][x] {
+                        borders_minus_given.vertical[y][x] = None;
+                    }
+                }
+            }
+            for y in 0..(height - 1) {
+                for x in 0..width {
+                    if default_borders.horizontal[y][x] {
+                        borders_minus_given.horizontal[y][x] = None
+                    }
+                }
+            }
+            board.add_borders_as_answer(Some(&borders_minus_given));
+        }
+    } else {
+        board.add_borders_as_answer(ans.as_ref().map(|(_, border)| border));
+    }
     Ok(board)
 }
 
